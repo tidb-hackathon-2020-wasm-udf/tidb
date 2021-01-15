@@ -291,6 +291,14 @@ const (
 	CreateOptRuleBlacklist = `CREATE TABLE IF NOT EXISTS mysql.opt_rule_blacklist (
 		name char(100) NOT NULL
 	);`
+
+	CreateWasmFunctionsTable = `CREATE TABLE IF NOT EXISTS mysql.wasm_functions (
+	  ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	  DB CHAR(64),
+	  Name CHAR(64),
+	  ByteCode LONGBLOB,
+	  UNIQUE KEY (DB, Name)
+	);`
 )
 
 // bootstrap initiates system DB for a store.
@@ -1303,6 +1311,7 @@ func doDDLWorks(s Session) {
 	mustExecute(s, CreateExprPushdownBlacklist)
 	// Create opt_rule_blacklist table.
 	mustExecute(s, CreateOptRuleBlacklist)
+	mustExecute(s, CreateWasmFunctionsTable)
 }
 
 // doDMLWorks executes DML statements in bootstrap stage.

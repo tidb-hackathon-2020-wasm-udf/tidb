@@ -289,6 +289,8 @@ func (p *preprocessor) Leave(in ast.Node) (out ast.Node, ok bool) {
 		if !valid {
 			p.err = ErrUnknownExplainFormat.GenWithStackByArgs(x.Format)
 		}
+	case *ast.FunctionName:
+		p.handleFunctionName(x)
 	case *ast.TableName:
 		p.handleTableName(x)
 	case *ast.Join:
@@ -900,6 +902,17 @@ func (p *preprocessor) checkContainDotColumn(stmt *ast.CreateTableStmt) {
 			p.err = ddl.ErrWrongTableName.GenWithStackByArgs(colDef.Name.Table.O)
 			return
 		}
+	}
+}
+
+func (p *preprocessor) handleFunctionName(fn *ast.FunctionName) {
+	if fn.Schema.L == "" {
+		currentDB := p.ctx.GetSessionVars().CurrentDB
+		if currentDB == "" {
+			p.err = errors.Trace(ErrNoDB)
+			return
+		}
+		fn.Schema = model.NewCIStr(currentDB)
 	}
 }
 

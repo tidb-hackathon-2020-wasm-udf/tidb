@@ -28,6 +28,8 @@ var (
 	ErrBuildExecutor   = dbterror.ClassExecutor.NewStd(mysql.ErrBuildExecutor)
 	ErrBatchInsertFail = dbterror.ClassExecutor.NewStd(mysql.ErrBatchInsertFail)
 	ErrUnsupportedPs   = dbterror.ClassExecutor.NewStd(mysql.ErrUnsupportedPs)
+	ErrUdfExists       = dbterror.ClassExecutor.NewStd(mysql.ErrUdfExists)
+	ErrCantFindUdf     = dbterror.ClassExecutor.NewStd(mysql.ErrCantFindUdf)
 
 	ErrCantCreateUserWithGrant     = dbterror.ClassExecutor.NewStd(mysql.ErrCantCreateUserWithGrant)
 	ErrPasswordNoMatch             = dbterror.ClassExecutor.NewStd(mysql.ErrPasswordNoMatch)

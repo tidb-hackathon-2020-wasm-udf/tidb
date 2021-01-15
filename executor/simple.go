@@ -15,6 +15,7 @@ package executor
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"strings"
@@ -139,6 +140,12 @@ func (e *SimpleExec) Next(ctx context.Context, req *chunk.Chunk) (err error) {
 		err = e.executeSetDefaultRole(x)
 	case *ast.ShutdownStmt:
 		err = e.executeShutdown(x)
+	case *ast.CreateFunctionStmt:
+		err = e.executeCreateFunction(ctx, x)
+	case *ast.DropFunctionStmt:
+		err = e.executeDropFunction(ctx, x)
+	case *ast.FlushFunctionsStmt:
+		err = e.executeFlushFunctions(x)
 	}
 	e.done = true
 	return err
@@ -661,6 +668,93 @@ func (e *SimpleExec) executeRollback(s *ast.RollbackStmt) error {
 	return nil
 }
 
+func functionExists(ctx sessionctx.Context, db string, name string) (bool, error) {
+	sql := fmt.Sprintf(`SELECT ID FROM mysql.wasm_functions WHERE DB='%s' AND Name='%s';`, db, name)
+	rows, _, err := ctx.(sqlexec.RestrictedSQLExecutor).ExecRestrictedSQL(sql)
+	if err != nil {
+		return false, err
+	}
+	return len(rows) > 0, nil
+}
+
+func (e *SimpleExec) executeCreateFunction(ctx context.Context, s *ast.CreateFunctionStmt) error {
+	exists, err := functionExists(e.ctx, s.Name.Schema.L, s.Name.Name.L)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return ErrUdfExists.GenWithStackByArgs(s.Name.Name.String())
+	}
+
+	sql := fmt.Sprintf(`INSERT INTO mysql.wasm_functions (DB, Name, ByteCode) VALUES ('%s', '%s', x'%s');`,
+		s.Name.Schema.L,
+		s.Name.Name.L,
+		hex.EncodeToString(s.Body))
+
+	restrictedCtx, err := e.getSysSession()
+	if err != nil {
+		return err
+	}
+	defer e.releaseSysSession(restrictedCtx)
+	sqlExecutor := restrictedCtx.(sqlexec.SQLExecutor)
+
+	if _, err := sqlExecutor.Execute(context.Background(), "begin"); err != nil {
+		return errors.Trace(err)
+	}
+	_, err = sqlExecutor.Execute(context.Background(), sql)
+	if err != nil {
+		if _, rollbackErr := sqlExecutor.Execute(context.Background(), "rollback"); rollbackErr != nil {
+			return rollbackErr
+		}
+		return err
+	}
+	if _, err := sqlExecutor.Execute(context.Background(), "commit"); err != nil {
+		return errors.Trace(err)
+	}
+	domain.GetDomain(e.ctx).NotifyUpdateFunctionsCache(e.ctx)
+	return nil
+}
+
+func (e *SimpleExec) executeDropFunction(ctx context.Context, s *ast.DropFunctionStmt) error {
+	exists, err := functionExists(e.ctx, s.Name.Schema.L, s.Name.Name.L)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		if !s.IfExists {
+			return ErrCantFindUdf.GenWithStackByArgs(s.Name.Name.String())
+		}
+		return nil
+	}
+
+	sql := fmt.Sprintf(`DELETE FROM mysql.wasm_functions WHERE DB = '%s' AND Name = '%s';`,
+		s.Name.Schema.L,
+		s.Name.Name.L)
+
+	restrictedCtx, err := e.getSysSession()
+	if err != nil {
+		return err
+	}
+	defer e.releaseSysSession(restrictedCtx)
+	sqlExecutor := restrictedCtx.(sqlexec.SQLExecutor)
+
+	if _, err := sqlExecutor.Execute(context.Background(), "begin"); err != nil {
+		return errors.Trace(err)
+	}
+	_, err = sqlExecutor.Execute(context.Background(), sql)
+	if err != nil {
+		if _, rollbackErr := sqlExecutor.Execute(context.Background(), "rollback"); rollbackErr != nil {
+			return rollbackErr
+		}
+		return err
+	}
+	if _, err := sqlExecutor.Execute(context.Background(), "commit"); err != nil {
+		return errors.Trace(err)
+	}
+	domain.GetDomain(e.ctx).NotifyUpdateFunctionsCache(e.ctx)
+	return nil
+}
+
 func (e *SimpleExec) executeCreateUser(ctx context.Context, s *ast.CreateUserStmt) error {
 	// Check `CREATE USER` privilege.
 	if !config.GetGlobalConfig().Security.SkipGrantTable {
@@ -1116,6 +1210,18 @@ func (e *SimpleExec) executeFlush(s *ast.FlushStmt) error {
 		}
 	}
 	return nil
+}
+
+func (e *SimpleExec) executeFlushFunctions(s *ast.FlushFunctionsStmt) error {
+	dom := domain.GetDomain(e.ctx)
+	sysSessionPool := dom.SysSessionPool()
+	ctx, err := sysSessionPool.Get()
+	if err != nil {
+		return err
+	}
+	defer sysSessionPool.Put(ctx)
+	err = dom.FunctionsCacheHandle().Update(ctx.(sessionctx.Context))
+	return err
 }
 
 func (e *SimpleExec) executeAlterInstance(s *ast.AlterInstanceStmt) error {

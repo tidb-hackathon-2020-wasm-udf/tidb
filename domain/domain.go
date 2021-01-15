@@ -51,6 +51,7 @@ import (
 	"github.com/pingcap/tidb/util/expensivequery"
 	"github.com/pingcap/tidb/util/logutil"
 	"github.com/pingcap/tidb/util/sqlexec"
+	"github.com/pingcap/tidb/wasmudf"
 	"go.etcd.io/etcd/clientv3"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -63,6 +64,7 @@ type Domain struct {
 	store                kv.Storage
 	infoHandle           *infoschema.Handle
 	privHandle           *privileges.Handle
+	udfHandle            *wasmudf.Handle
 	bindHandle           *bindinfo.BindHandle
 	statsHandle          unsafe.Pointer
 	statsLease           time.Duration
@@ -901,9 +903,19 @@ func (do *Domain) PrivilegeHandle() *privileges.Handle {
 	return do.privHandle
 }
 
+func (do *Domain) FunctionsCacheHandle() *wasmudf.Handle {
+	return do.udfHandle
+}
+
 // BindHandle returns domain's bindHandle.
 func (do *Domain) BindHandle() *bindinfo.BindHandle {
 	return do.bindHandle
+}
+
+func (do *Domain) LoadUDFHandle(ctx sessionctx.Context) error {
+	ctx.GetSessionVars().InRestrictedSQL = true
+	do.udfHandle = wasmudf.NewHandle()
+	return do.udfHandle.Update(ctx)
 }
 
 // LoadBindInfoLoop create a goroutine loads BindInfo in a loop, it should
@@ -1218,6 +1230,14 @@ func (do *Domain) NotifyUpdatePrivilege(ctx sessionctx.Context) {
 	_, _, err := ctx.(sqlexec.RestrictedSQLExecutor).ExecRestrictedSQL(`FLUSH PRIVILEGES`)
 	if err != nil {
 		logutil.BgLogger().Error("unable to update privileges", zap.Error(err))
+	}
+}
+
+func (do *Domain) NotifyUpdateFunctionsCache(ctx sessionctx.Context) {
+	// TODO: Notify other TiDB.
+	_, _, err := ctx.(sqlexec.RestrictedSQLExecutor).ExecRestrictedSQL(`FLUSH FUNCTIONS`)
+	if err != nil {
+		logutil.BgLogger().Error("unable to update functions", zap.Error(err))
 	}
 }
 

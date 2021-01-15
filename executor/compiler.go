@@ -360,6 +360,10 @@ func GetStmtLabel(stmtNode ast.StmtNode) string {
 		return "CreateBinding"
 	case *ast.IndexAdviseStmt:
 		return "IndexAdvise"
+	case *ast.CreateFunctionStmt:
+		return "CreateFunction"
+	case *ast.DropFunctionStmt:
+		return "DropFunction"
 	}
 	return "other"
 }

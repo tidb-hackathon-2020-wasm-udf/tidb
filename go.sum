@@ -508,6 +508,10 @@ github.com/tiancaiamao/appdash v0.0.0-20181126055449-889f96f722a2 h1:mbAskLJ0oJf
 github.com/tiancaiamao/appdash v0.0.0-20181126055449-889f96f722a2/go.mod h1:2PfKggNGDuadAa0LElHrByyrz4JPZ9fFx6Gs7nx7ZZU=
 github.com/tidb-hackathon-2020-wasm-udf/parser v0.0.0-20210115132656-e47d3c3fdd17 h1:ORgwfrAM1A+5B25S27SvWLL9xm+V2yEIN4wOX3TEb/8=
 github.com/tidb-hackathon-2020-wasm-udf/parser v0.0.0-20210115132656-e47d3c3fdd17/go.mod h1:GbEr2PgY72/4XqPZzmzstlOU/+il/wrjeTNFs6ihsSE=
+github.com/tidb-hackathon-2020-wasm-udf/parser v0.0.0-20210115151355-b723f14eb092 h1:Tz0m1eGf+Md5Kg1AWN0KrbhRWM7kKzaa+MVX9NBuCAs=
+github.com/tidb-hackathon-2020-wasm-udf/parser v0.0.0-20210115151355-b723f14eb092/go.mod h1:GbEr2PgY72/4XqPZzmzstlOU/+il/wrjeTNFs6ihsSE=
+github.com/tidb-hackathon-2020-wasm-udf/parser v0.0.0-20210115160114-9af255a79db9 h1:JWfkrsfF6vSYPzkTuT6ugYYyIlxYrK9xaUbnuo4fdgo=
+github.com/tidb-hackathon-2020-wasm-udf/parser v0.0.0-20210115160114-9af255a79db9/go.mod h1:GbEr2PgY72/4XqPZzmzstlOU/+il/wrjeTNFs6ihsSE=
 github.com/tidwall/gjson v1.3.5/go.mod h1:P256ACg0Mn+j1RXIDXoss50DeIABTYK1PULOJHhxOls=
 github.com/tidwall/match v1.0.1/go.mod h1:LujAq0jyVjBy028G1WhWfIzbpQfMO8bBZ6Tyb0+pL9E=
 github.com/tidwall/pretty v1.0.0/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=

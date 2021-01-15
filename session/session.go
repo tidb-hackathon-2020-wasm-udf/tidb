@@ -1829,6 +1829,11 @@ func BootstrapSession(store kv.Storage) (*domain.Domain, error) {
 		}
 	}
 
+	err = dom.LoadUDFHandle(se)
+	if err != nil {
+		return nil, err
+	}
+
 	if len(cfg.Plugin.Load) > 0 {
 		err := plugin.Init(context.Background(), plugin.Config{EtcdClient: dom.GetEtcdClient()})
 		if err != nil {
