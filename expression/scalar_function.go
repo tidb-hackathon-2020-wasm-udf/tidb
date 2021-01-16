@@ -16,6 +16,7 @@ package expression
 import (
 	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/pingcap/errors"
 	"github.com/pingcap/parser/ast"
@@ -30,6 +31,7 @@ import (
 	"github.com/pingcap/tidb/util/codec"
 	"github.com/pingcap/tidb/util/dbterror"
 	"github.com/pingcap/tidb/util/hack"
+	"github.com/pingcap/tidb/wasmudf"
 )
 
 // error definitions.
@@ -187,6 +189,26 @@ func newFunctionImpl(ctx sessionctx.Context, fold int, funcName string, retType 
 	case ast.GetVar:
 		return BuildGetVarFunction(ctx, args[0], retType)
 	}
+
+	wasmFnRepo := wasmudf.WASMHandle.Get()
+	wasmFn := wasmFnRepo.GetFunction(strings.ToLower(ctx.GetSessionVars().CurrentDB), strings.ToLower(funcName))
+
+	if wasmFn != nil {
+		funcArgs := make([]Expression, len(args))
+		copy(funcArgs, args)
+		typeInferForNull(funcArgs)
+		f, err := newWasmFunctionSig(wasmFn, ctx, funcArgs)
+		if err != nil {
+			return nil, err
+		}
+		sf := &ScalarFunction{
+			FuncName: model.NewCIStr(funcName),
+			RetType:  f.getRetTp(),
+			Function: f,
+		}
+		return sf, nil
+	}
+
 	fc, ok := funcs[funcName]
 	if !ok {
 		db := ctx.GetSessionVars().CurrentDB

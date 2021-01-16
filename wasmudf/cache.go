@@ -2,8 +2,6 @@ package wasmudf
 
 import (
 	"context"
-	"encoding/hex"
-	"fmt"
 	"sync/atomic"
 
 	"github.com/pingcap/errors"
@@ -11,13 +9,17 @@ import (
 	"github.com/pingcap/tidb/sessionctx"
 	"github.com/pingcap/tidb/util/chunk"
 	"github.com/pingcap/tidb/util/sqlexec"
+	"github.com/pingcap/tidb/wasmudfutil"
+	"github.com/wasmerio/wasmer-go/wasmer"
 )
 
 type WASMFn struct {
-	ID        int64
-	DBLower   string
-	NameLower string
-	ByteCode  []byte
+	ID               int64
+	DBLower          string
+	NameLower        string
+	Module           *wasmer.Module
+	ByteCodeCompiled []byte
+	Signature        wasmudfutil.WasmFnSignature
 }
 
 type WASMFunctions struct {
@@ -61,9 +63,8 @@ func (fTable *WASMFunctions) GetFunction(dbLower string, nameLower string) *WASM
 }
 
 func (fTable *WASMFunctions) loadTable(sctx sessionctx.Context) error {
-	fmt.Println("!!!! WASMFunctions.loadTable")
 	ctx := context.Background()
-	tmp, err := sctx.(sqlexec.SQLExecutor).Execute(ctx, "select ID, DB, Name, ByteCode from mysql.wasm_functions;")
+	tmp, err := sctx.(sqlexec.SQLExecutor).Execute(ctx, "select ID, DB, Name, ByteCode, RetType, ParamsType from mysql.wasm_functions;")
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -83,6 +84,7 @@ func (fTable *WASMFunctions) loadTable(sctx sessionctx.Context) error {
 		it := chunk.NewIterator4Chunk(req)
 		for row := it.Begin(); row != it.End(); row = it.Next() {
 			var value WASMFn
+			var rStr, pStr string
 			for i, f := range fs {
 				switch f.ColumnAsName.L {
 				case "id":
@@ -92,10 +94,18 @@ func (fTable *WASMFunctions) loadTable(sctx sessionctx.Context) error {
 				case "name":
 					value.NameLower = row.GetString(i)
 				case "bytecode":
-					value.ByteCode = row.GetBytes(i)
-					fmt.Printf("!!! Load WASM Table, ByteCode = %s\n", hex.EncodeToString(value.ByteCode))
+					module, err := wasmer.NewModule(wasmudfutil.Store, row.GetBytes(i))
+					if err != nil {
+						return errors.Errorf("failed to load WASM module: %s", err.Error())
+					}
+					value.Module = module
+				case "rettype":
+					rStr = row.GetString(i)
+				case "paramstype":
+					pStr = row.GetString(i)
 				}
 			}
+			value.Signature = wasmudfutil.NewWasmFnSignatureFromSer(rStr, pStr)
 			fTable.Functions = append(fTable.Functions, &value)
 		}
 		req = chunk.Renew(req, sctx.GetSessionVars().MaxChunkSize)
@@ -123,3 +133,5 @@ func (h *Handle) Update(ctx sessionctx.Context) error {
 	h.p.Store(&fTable)
 	return nil
 }
+
+var WASMHandle *Handle = nil

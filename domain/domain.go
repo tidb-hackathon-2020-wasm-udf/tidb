@@ -64,7 +64,6 @@ type Domain struct {
 	store                kv.Storage
 	infoHandle           *infoschema.Handle
 	privHandle           *privileges.Handle
-	udfHandle            *wasmudf.Handle
 	bindHandle           *bindinfo.BindHandle
 	statsHandle          unsafe.Pointer
 	statsLease           time.Duration
@@ -903,9 +902,10 @@ func (do *Domain) PrivilegeHandle() *privileges.Handle {
 	return do.privHandle
 }
 
-func (do *Domain) FunctionsCacheHandle() *wasmudf.Handle {
-	return do.udfHandle
-}
+//
+//func (do *Domain) FunctionsCacheHandle() *wasmudf.Handle {
+//	return do.udfHandle
+//}
 
 // BindHandle returns domain's bindHandle.
 func (do *Domain) BindHandle() *bindinfo.BindHandle {
@@ -914,8 +914,9 @@ func (do *Domain) BindHandle() *bindinfo.BindHandle {
 
 func (do *Domain) LoadUDFHandle(ctx sessionctx.Context) error {
 	ctx.GetSessionVars().InRestrictedSQL = true
-	do.udfHandle = wasmudf.NewHandle()
-	return do.udfHandle.Update(ctx)
+	wasmudf.WASMHandle = wasmudf.NewHandle()
+	wasmudf.WASMHandle.Update(ctx)
+	return nil
 }
 
 // LoadBindInfoLoop create a goroutine loads BindInfo in a loop, it should

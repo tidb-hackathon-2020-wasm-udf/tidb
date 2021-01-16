@@ -42,6 +42,8 @@ import (
 	"github.com/pingcap/tidb/util/hack"
 	"github.com/pingcap/tidb/util/logutil"
 	"github.com/pingcap/tidb/util/sqlexec"
+	"github.com/pingcap/tidb/wasmudf"
+	"github.com/pingcap/tidb/wasmudfutil"
 	"go.uber.org/zap"
 )
 
@@ -686,10 +688,17 @@ func (e *SimpleExec) executeCreateFunction(ctx context.Context, s *ast.CreateFun
 		return ErrUdfExists.GenWithStackByArgs(s.Name.Name.String())
 	}
 
-	sql := fmt.Sprintf(`INSERT INTO mysql.wasm_functions (DB, Name, ByteCode) VALUES ('%s', '%s', x'%s');`,
+	sig, err := wasmudfutil.ParseByteCodeSignatures(s.Body)
+	if err != nil {
+		return err
+	}
+
+	sql := fmt.Sprintf(`INSERT INTO mysql.wasm_functions (DB, Name, ByteCode, RetType, ParamsType) VALUES ('%s', '%s', x'%s', '%s', '%s');`,
 		s.Name.Schema.L,
 		s.Name.Name.L,
-		hex.EncodeToString(s.Body))
+		hex.EncodeToString(s.Body),
+		sig.SerializeRet(),
+		sig.SerializeParams())
 
 	restrictedCtx, err := e.getSysSession()
 	if err != nil {
@@ -1220,8 +1229,7 @@ func (e *SimpleExec) executeFlushFunctions(s *ast.FlushFunctionsStmt) error {
 		return err
 	}
 	defer sysSessionPool.Put(ctx)
-	err = dom.FunctionsCacheHandle().Update(ctx.(sessionctx.Context))
-	return err
+	return wasmudf.WASMHandle.Update(ctx.(sessionctx.Context))
 }
 
 func (e *SimpleExec) executeAlterInstance(s *ast.AlterInstanceStmt) error {

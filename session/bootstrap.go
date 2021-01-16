@@ -293,11 +293,13 @@ const (
 	);`
 
 	CreateWasmFunctionsTable = `CREATE TABLE IF NOT EXISTS mysql.wasm_functions (
-	  ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	  DB CHAR(64),
-	  Name CHAR(64),
-	  ByteCode LONGBLOB,
-	  UNIQUE KEY (DB, Name)
+		ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+		DB VARCHAR(64),
+		Name VARCHAR(64),
+		ByteCode LONGBLOB,
+		RetType CHAR(1),
+		ParamsType VARCHAR(60),
+		UNIQUE KEY (DB, Name)
 	);`
 )
 
