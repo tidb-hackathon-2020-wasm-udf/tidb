@@ -818,6 +818,10 @@ github.com/tecbot/gorocksdb v0.0.0-20191217155057-f0fad39f321c/go.mod h1:ahpPrc7
 github.com/thda/tds v0.1.7/go.mod h1:isLIF1oZdXfkqVMJM8RyNrsjlHPlTKnPlnsBs7ngZcM=
 github.com/tiancaiamao/appdash v0.0.0-20181126055449-889f96f722a2 h1:mbAskLJ0oJfDRtkanvQPiooDH8HvJ2FBh+iKT/OmiQQ=
 github.com/tiancaiamao/appdash v0.0.0-20181126055449-889f96f722a2/go.mod h1:2PfKggNGDuadAa0LElHrByyrz4JPZ9fFx6Gs7nx7ZZU=
+github.com/tidb-hackathon-2020-wasm-udf/parser v0.0.0-20210116031708-b60f69c1f130 h1:vu2t3nLmypmmuoiK2AIwXNXWg9/XyWuxLwyGauaIw6M=
+github.com/tidb-hackathon-2020-wasm-udf/parser v0.0.0-20210116031708-b60f69c1f130/go.mod h1:GbEr2PgY72/4XqPZzmzstlOU/+il/wrjeTNFs6ihsSE=
+github.com/tidb-hackathon-2020-wasm-udf/tipb v0.0.0-20210116060701-a332bb711632 h1:3zN1hHphd5IRHXglQJNaMCaQUrsjeFSnfJoWEjw6jpo=
+github.com/tidb-hackathon-2020-wasm-udf/tipb v0.0.0-20210116060701-a332bb711632/go.mod h1:7jCTcFcelogFdO6a0avAJ4GSJ52inpW8gB4AGhYgaK0=
 github.com/tidwall/gjson v1.3.5/go.mod h1:P256ACg0Mn+j1RXIDXoss50DeIABTYK1PULOJHhxOls=
 github.com/tidwall/match v1.0.1/go.mod h1:LujAq0jyVjBy028G1WhWfIzbpQfMO8bBZ6Tyb0+pL9E=
 github.com/tidwall/pretty v1.0.0/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
