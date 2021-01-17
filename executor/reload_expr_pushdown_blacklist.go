@@ -329,5 +329,5 @@ var funcName2Alias = map[string]string{
 	"json_depth":                 ast.JSONDepth,
 	"json_keys":                  ast.JSONKeys,
 	"json_length":                ast.JSONLength,
-	"nbody":                      ast.NBODY,
+	"nbody":                      "nbody",
 }

@@ -606,7 +606,7 @@ var funcs = map[string]functionClass{
 	ast.Tan:      &tanFunctionClass{baseFunctionClass{ast.Tan, 1, 1}},
 	ast.Truncate: &truncateFunctionClass{baseFunctionClass{ast.Truncate, 2, 2}},
 
-	ast.NBODY: &nbodyFunctionClass{baseFunctionClass{ast.NBODY, 1, 1}},
+	"nbody": &nbodyFunctionClass{baseFunctionClass{"nbody", 1, 1}},
 
 	// time functions
 	ast.AddDate:          &addDateFunctionClass{baseFunctionClass{ast.AddDate, 3, 3}},
