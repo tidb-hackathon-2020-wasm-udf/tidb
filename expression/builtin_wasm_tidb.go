@@ -72,7 +72,7 @@ func (b *builtinWasmTidbSig) evalString(row chunk.Row) (d string, isNull bool, e
 	if isNull || err != nil {
 		return d, isNull, err
 	}
-	os.Setenv("PATH", "/Users/hawkingrei/.wasmer/bin:"+os.ExpandEnv("PATH"))
+	os.Setenv("PATH", "~/.wasmer/bin:"+os.ExpandEnv("PATH"))
 	result, err := exec.Command("wasmer", "run", string(wasm), string(sql)).Output()
 	if err != nil {
 		return d, isNull, err
