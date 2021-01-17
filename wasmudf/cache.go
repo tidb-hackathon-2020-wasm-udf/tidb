@@ -5,12 +5,14 @@ import (
 	"sync/atomic"
 
 	"github.com/pingcap/errors"
+	"github.com/pingcap/log"
 	"github.com/pingcap/parser/terror"
 	"github.com/pingcap/tidb/sessionctx"
 	"github.com/pingcap/tidb/util/chunk"
 	"github.com/pingcap/tidb/util/sqlexec"
 	"github.com/pingcap/tidb/wasmudfutil"
 	"github.com/wasmerio/wasmer-go/wasmer"
+	"go.uber.org/zap"
 )
 
 type WASMFn struct {
@@ -19,6 +21,7 @@ type WASMFn struct {
 	NameLower        string
 	Module           *wasmer.Module
 	ByteCodeCompiled []byte
+	CRC              uint64
 	Signature        wasmudfutil.WasmFnSignature
 }
 
@@ -33,6 +36,7 @@ func (fTable *WASMFunctions) LoadAll(sctx sessionctx.Context) error {
 	fTable.FnByID = make(map[int64]*WASMFn)
 	fTable.FnByName = make(map[string]map[string]*WASMFn)
 	if err := fTable.loadTable(sctx); err != nil {
+		log.Warn("WASM load table failed", zap.Error(err))
 		return err
 	}
 	fTable.buildLookupMap()
@@ -94,7 +98,10 @@ func (fTable *WASMFunctions) loadTable(sctx sessionctx.Context) error {
 				case "name":
 					value.NameLower = row.GetString(i)
 				case "bytecode":
-					module, err := wasmer.NewModule(wasmudfutil.Store, row.GetBytes(i))
+					bc := row.GetBytes(i)
+					value.CRC = wasmudfutil.Checksum(bc)
+
+					module, err := wasmer.NewModule(wasmudfutil.Store, bc)
 					if err != nil {
 						return errors.Errorf("failed to load WASM module: %s", err.Error())
 					}
@@ -121,10 +128,15 @@ func NewHandle() *Handle {
 }
 
 func (h *Handle) Get() *WASMFunctions {
-	return h.p.Load().(*WASMFunctions)
+	ptr := h.p.Load()
+	if ptr == nil {
+		return nil
+	}
+	return ptr.(*WASMFunctions)
 }
 
 func (h *Handle) Update(ctx sessionctx.Context) error {
+	log.Info("Update WASM Handle")
 	var fTable WASMFunctions
 	err := fTable.LoadAll(ctx)
 	if err != nil {
@@ -135,3 +147,7 @@ func (h *Handle) Update(ctx sessionctx.Context) error {
 }
 
 var WASMHandle *Handle = nil
+
+func init() {
+	WASMHandle = NewHandle()
+}

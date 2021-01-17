@@ -693,6 +693,11 @@ func (e *SimpleExec) executeCreateFunction(ctx context.Context, s *ast.CreateFun
 		return err
 	}
 
+	err = wasmudfutil.PersistByteCode(s.Body)
+	if err != nil {
+		return err
+	}
+
 	sql := fmt.Sprintf(`INSERT INTO mysql.wasm_functions (DB, Name, ByteCode, RetType, ParamsType) VALUES ('%s', '%s', x'%s', '%s', '%s');`,
 		s.Name.Schema.L,
 		s.Name.Name.L,

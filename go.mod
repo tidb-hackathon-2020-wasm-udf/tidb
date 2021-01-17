@@ -71,13 +71,13 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.16.0
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
-	golang.org/x/net v0.0.0-20200813134508-3edf25e44fcc
+	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
-	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
-	golang.org/x/sys v0.0.0-20200819171115-d785dc25833f
+	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
+	golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f
 	golang.org/x/text v0.3.4
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
-	golang.org/x/tools v0.0.0-20200820010801-b793a1359eac
+	golang.org/x/tools v0.0.0-20201125231158-b5590deeca9b
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/api v0.15.1 // indirect
 	google.golang.org/genproto v0.0.0-20200108215221-bd8f9a0ef82f // indirect
@@ -93,3 +93,5 @@ require (
 go 1.13
 
 replace github.com/pingcap/parser => github.com/tidb-hackathon-2020-wasm-udf/parser v0.0.0-20210115160114-9af255a79db9
+
+replace github.com/pingcap/tipb => github.com/tidb-hackathon-2020-wasm-udf/tipb v0.0.0-20210116131634-beb7bec0240e

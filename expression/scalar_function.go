@@ -191,22 +191,23 @@ func newFunctionImpl(ctx sessionctx.Context, fold int, funcName string, retType 
 	}
 
 	wasmFnRepo := wasmudf.WASMHandle.Get()
-	wasmFn := wasmFnRepo.GetFunction(strings.ToLower(ctx.GetSessionVars().CurrentDB), strings.ToLower(funcName))
-
-	if wasmFn != nil {
-		funcArgs := make([]Expression, len(args))
-		copy(funcArgs, args)
-		typeInferForNull(funcArgs)
-		f, err := newWasmFunctionSig(wasmFn, ctx, funcArgs)
-		if err != nil {
-			return nil, err
+	if wasmFnRepo != nil {
+		wasmFn := wasmFnRepo.GetFunction(strings.ToLower(ctx.GetSessionVars().CurrentDB), strings.ToLower(funcName))
+		if wasmFn != nil {
+			funcArgs := make([]Expression, len(args))
+			copy(funcArgs, args)
+			typeInferForNull(funcArgs)
+			f, err := newWasmFunctionSig(wasmFn, ctx, funcArgs)
+			if err != nil {
+				return nil, err
+			}
+			sf := &ScalarFunction{
+				FuncName: model.NewCIStr(funcName),
+				RetType:  f.getRetTp(),
+				Function: f,
+			}
+			return sf, nil
 		}
-		sf := &ScalarFunction{
-			FuncName: model.NewCIStr(funcName),
-			RetType:  f.getRetTp(),
-			Function: f,
-		}
-		return sf, nil
 	}
 
 	fc, ok := funcs[funcName]

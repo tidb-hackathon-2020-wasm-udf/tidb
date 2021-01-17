@@ -269,11 +269,14 @@ func (pc PbConverter) scalarFuncToPBExpr(expr *ScalarFunction) *tipb.Expr {
 		_, tp.Collate = expr.CharsetAndCollation(expr.GetCtx())
 	}
 
+	wasmId := expr.Function.WasmID()
+
 	// Construct expression ProtoBuf.
 	return &tipb.Expr{
 		Tp:        tipb.ExprType_ScalarFunc,
 		Val:       encoded,
 		Sig:       pbCode,
+		WasmUdfId: &wasmId,
 		Children:  children,
 		FieldType: ToPBFieldType(&tp),
 	}

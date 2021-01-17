@@ -50,6 +50,7 @@ type baseBuiltinFunc struct {
 	ctx          sessionctx.Context
 	tp           *types.FieldType
 	pbCode       tipb.ScalarFuncSig
+	wasmId       uint64
 	ctor         collate.Collator
 
 	childrenVectorized bool
@@ -65,6 +66,10 @@ func (b *baseBuiltinFunc) PbCode() tipb.ScalarFuncSig {
 	return b.pbCode
 }
 
+func (b *baseBuiltinFunc) WasmID() uint64 {
+	return b.wasmId
+}
+
 // metadata returns the metadata of a function.
 // metadata means some functions contain extra inner fields which will not
 // contain in `tipb.Expr.children` but must be pushed down to coprocessor
@@ -72,6 +77,10 @@ func (b *baseBuiltinFunc) metadata() proto.Message {
 	// We will not use a field to store them because of only
 	// a few functions contain implicit parameters
 	return nil
+}
+
+func (b *baseBuiltinFunc) setWasmId(id uint64) {
+	b.wasmId = id
 }
 
 func (b *baseBuiltinFunc) setPbCode(c tipb.ScalarFuncSig) {
@@ -402,6 +411,7 @@ func (b *baseBuiltinFunc) cloneFrom(from *baseBuiltinFunc) {
 	b.ctx = from.ctx
 	b.tp = from.tp
 	b.pbCode = from.pbCode
+	b.wasmId = from.wasmId
 	b.bufAllocator = newLocalSliceBuffer(len(b.args))
 	b.childrenVectorizedOnce = new(sync.Once)
 	b.childrenReversedOnce = new(sync.Once)
@@ -513,6 +523,7 @@ type builtinFunc interface {
 	setPbCode(tipb.ScalarFuncSig)
 	// PbCode returns PbCode of this signature.
 	PbCode() tipb.ScalarFuncSig
+	WasmID() uint64
 	// setCollator sets collator for signature.
 	setCollator(ctor collate.Collator)
 	// collator returns collator of this signature.

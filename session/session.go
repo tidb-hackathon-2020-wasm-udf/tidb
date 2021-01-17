@@ -72,6 +72,7 @@ import (
 	"github.com/pingcap/tidb/util/logutil"
 	"github.com/pingcap/tidb/util/sqlexec"
 	"github.com/pingcap/tidb/util/timeutil"
+	"github.com/pingcap/tidb/wasmudf"
 	"github.com/pingcap/tipb/go-binlog"
 	"go.uber.org/zap"
 )
@@ -1773,6 +1774,11 @@ func BootstrapSession(store kv.Storage) (*domain.Domain, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if err := wasmudf.WASMHandle.Update(se); err != nil {
+		return nil, err
+	}
+
 	// get system tz from mysql.tidb
 	tz, err := loadSystemTZ(se)
 	if err != nil {
@@ -1827,11 +1833,6 @@ func BootstrapSession(store kv.Storage) (*domain.Domain, error) {
 		if err != nil {
 			return nil, err
 		}
-	}
-
-	err = dom.LoadUDFHandle(se)
-	if err != nil {
-		return nil, err
 	}
 
 	if len(cfg.Plugin.Load) > 0 {

@@ -9,6 +9,7 @@ import (
 	"github.com/pingcap/tidb/util/chunk"
 	"github.com/pingcap/tidb/wasmudf"
 	"github.com/pingcap/tidb/wasmudfutil"
+	"github.com/pingcap/tipb/go-tipb"
 	"github.com/wasmerio/wasmer-go/wasmer"
 )
 
@@ -38,6 +39,8 @@ func newWasmFunctionSig(f *wasmudf.WASMFn, ctx sessionctx.Context, args []Expres
 		return nil, errors.Errorf("failed to find WASM entry: %s", err.Error())
 	}
 	sig := &wasmFunctionSig{bf, f.Signature, entry}
+	sig.setPbCode(tipb.ScalarFuncSig_WasmUdf)
+	sig.setWasmId(f.CRC)
 	return sig, nil
 }
 

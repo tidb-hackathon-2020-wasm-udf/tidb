@@ -2,7 +2,10 @@ package wasmudfutil
 
 import (
 	"fmt"
+	"hash/crc64"
+	"io/ioutil"
 
+	"github.com/pingcap/errors"
 	"github.com/pingcap/parser/mysql"
 	"github.com/pingcap/tidb/types"
 	"github.com/wasmerio/wasmer-go/wasmer"
@@ -16,6 +19,7 @@ const (
 )
 
 const EntryFnName = "udf_main"
+const PersistPath = "/Users/breezewish/Work/PingCAP/runtime-wasm/"
 
 type WasmFnSignature struct {
 	RetType    WasmType
@@ -132,4 +136,19 @@ func ParseByteCodeSignatures(bytes []byte) (*WasmFnSignature, error) {
 		}
 	}
 	return &sig, nil
+}
+
+func Checksum(byteCode []byte) uint64 {
+	crc64q := crc64.MakeTable(crc64.ECMA)
+	return crc64.Checksum(byteCode, crc64q)
+}
+
+func PersistByteCode(byteCode []byte) error {
+	checksum := Checksum(byteCode)
+	path := fmt.Sprintf("%s/%d.wasm", PersistPath, checksum)
+	err := ioutil.WriteFile(path, byteCode, 0644)
+	if err != nil {
+		return errors.Errorf("failed to persist wasm byte code to %s", path)
+	}
+	return nil
 }

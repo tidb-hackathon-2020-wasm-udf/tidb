@@ -51,7 +51,6 @@ import (
 	"github.com/pingcap/tidb/util/expensivequery"
 	"github.com/pingcap/tidb/util/logutil"
 	"github.com/pingcap/tidb/util/sqlexec"
-	"github.com/pingcap/tidb/wasmudf"
 	"go.etcd.io/etcd/clientv3"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -910,13 +909,6 @@ func (do *Domain) PrivilegeHandle() *privileges.Handle {
 // BindHandle returns domain's bindHandle.
 func (do *Domain) BindHandle() *bindinfo.BindHandle {
 	return do.bindHandle
-}
-
-func (do *Domain) LoadUDFHandle(ctx sessionctx.Context) error {
-	ctx.GetSessionVars().InRestrictedSQL = true
-	wasmudf.WASMHandle = wasmudf.NewHandle()
-	wasmudf.WASMHandle.Update(ctx)
-	return nil
 }
 
 // LoadBindInfoLoop create a goroutine loads BindInfo in a loop, it should
