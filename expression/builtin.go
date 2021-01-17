@@ -556,6 +556,7 @@ type functionClass interface {
 // check expression/function_traits.go to see if it should be appended to
 // any set there.
 var funcs = map[string]functionClass{
+	"wasm_tidb": &wasmTidbFunctionClass{baseFunctionClass{"wasm_tidb", 2, 2}},
 	// common functions
 	ast.Coalesce: &coalesceFunctionClass{baseFunctionClass{ast.Coalesce, 1, -1}},
 	ast.IsNull:   &isNullFunctionClass{baseFunctionClass{ast.IsNull, 1, 1}},
