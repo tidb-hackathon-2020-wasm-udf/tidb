@@ -514,6 +514,8 @@ github.com/tidb-hackathon-2020-wasm-udf/parser v0.0.0-20210115151355-b723f14eb09
 github.com/tidb-hackathon-2020-wasm-udf/parser v0.0.0-20210115151355-b723f14eb092/go.mod h1:GbEr2PgY72/4XqPZzmzstlOU/+il/wrjeTNFs6ihsSE=
 github.com/tidb-hackathon-2020-wasm-udf/parser v0.0.0-20210115160114-9af255a79db9 h1:JWfkrsfF6vSYPzkTuT6ugYYyIlxYrK9xaUbnuo4fdgo=
 github.com/tidb-hackathon-2020-wasm-udf/parser v0.0.0-20210115160114-9af255a79db9/go.mod h1:GbEr2PgY72/4XqPZzmzstlOU/+il/wrjeTNFs6ihsSE=
+github.com/tidb-hackathon-2020-wasm-udf/parser v0.0.0-20210116163520-a748c1e9114f h1:IsgN2l/GZnuNXaFOQeZ7JvbNYKS/gVGH5tEEl583SJ0=
+github.com/tidb-hackathon-2020-wasm-udf/parser v0.0.0-20210116163520-a748c1e9114f/go.mod h1:GbEr2PgY72/4XqPZzmzstlOU/+il/wrjeTNFs6ihsSE=
 github.com/tidb-hackathon-2020-wasm-udf/tipb v0.0.0-20210116131034-78223fa9124c h1:b3g5hH7V4oJ32sv6/Lecvgn4sdnH7It0fIYksiLSA9M=
 github.com/tidb-hackathon-2020-wasm-udf/tipb v0.0.0-20210116131034-78223fa9124c/go.mod h1:nsEhnMokcn7MRqd2J60yxpn/ac3ZH8A6GOJ9NslabUo=
 github.com/tidb-hackathon-2020-wasm-udf/tipb v0.0.0-20210116131634-beb7bec0240e h1:WZg0yXC84MS7+/231ON02mo+kclOw4zGcOlfn7k5vtI=
