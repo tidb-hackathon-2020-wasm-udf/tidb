@@ -14,9 +14,11 @@
 package expression
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 
+	"github.com/pingcap/tidb/wasmudfutil"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/pingcap/tidb/sessionctx"
@@ -41,7 +43,7 @@ func (c *wasmTidbFunctionClass) getFunction(ctx sessionctx.Context, args []Expre
 		return nil, err
 	}
 	log.Infof("tidb wasm %v", args)
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -64,16 +66,12 @@ func (b *builtinWasmTidbSig) Clone() builtinFunc {
 }
 
 func (b *builtinWasmTidbSig) evalString(row chunk.Row) (d string, isNull bool, err error) {
-	wasm, isNull, err := b.args[0].EvalString(b.ctx, row)
-	if isNull || err != nil {
-		return d, isNull, err
-	}
-	sql, isNull, err := b.args[1].EvalString(b.ctx, row)
+	sql, isNull, err := b.args[0].EvalString(b.ctx, row)
 	if isNull || err != nil {
 		return d, isNull, err
 	}
 	os.Setenv("PATH", "~/.wasmer/bin:"+os.ExpandEnv("PATH"))
-	result, err := exec.Command("wasmer", "run", string(wasm), string(sql)).Output()
+	result, err := exec.Command("wasmer", "run", fmt.Sprintf("%s/tidb.wasm", wasmudfutil.PersistPath), string(sql)).Output()
 	if err != nil {
 		return d, isNull, err
 	}

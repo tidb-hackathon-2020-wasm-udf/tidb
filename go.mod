@@ -92,6 +92,4 @@ require (
 
 go 1.13
 
-replace github.com/pingcap/parser => github.com/tidb-hackathon-2020-wasm-udf/parser v0.0.0-20210116163520-a748c1e9114f
-
 replace github.com/pingcap/tipb => github.com/tidb-hackathon-2020-wasm-udf/tipb v0.0.0-20210116131634-beb7bec0240e
